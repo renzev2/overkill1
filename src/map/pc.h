@@ -142,7 +142,8 @@ struct map_session_data {
 		unsigned lesseffect : 1;
 		unsigned vending : 1;
 		unsigned short autoloot;
-		unsigned short autolootid; // [Zephyrus]
+		unsigned short autolootid[5]; // [Zephyrus]
+		unsigned short autolootactive;
 		unsigned noks : 3; // [Zeph Kill Steal Protection]
 		bool changemap;
 		short pmap; // Previous map on Map Change
