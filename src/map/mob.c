@@ -1747,12 +1747,29 @@ static void mob_item_drop(struct mob_data *md, struct item_drop_list *dlist, str
 	if( sd == NULL ) sd = map_charid2sd(dlist->third_charid);
 
 	if( sd
-		&& (drop_rate <= sd->state.autoloot || ditem->item_data.nameid == sd->state.autolootid)
+		&& (drop_rate <= sd->state.autoloot || mob_processdrop( sd, ditem->item_data.nameid ))
 		&& (battle_config.idle_no_autoloot == 0 || DIFF_TICK(last_tick, sd->idletime) < battle_config.idle_no_autoloot)
 		&& (battle_config.homunculus_autoloot?1:!flag)
 #ifdef AUTOLOOT_DISTANCE
-		&& sd->bl.m == md->bl.m
-		&& check_distance_blxy(&sd->bl, dlist->x, dlist->y, AUTOLOOT_DISTANCE)
+		dlist->item = ditem;
+	}
+	int mob_processdrop(struct map_session_data * sd, int nameid)
+{
+	int i;
+	for(i=0; i < 5; i++)
+	{
+	if(nameid == sd->state.autolootid[i])
+		return 1;
+	}
+	return 0;
+}
+	
+int mob_timer_delete(int tid, unsigned int tick, int id, intptr data)
+ {
+ 	struct block_list* bl = map_id2bl(id);
+}	
+		
+		
 #endif
 	) {	//Autoloot.
 		if (party_share_loot(party_search(sd->status.party_id),
@@ -2655,7 +2672,7 @@ int mob_class_change (struct mob_data *md, int class_)
 }
 
 /*==========================================
- * mob‰ñ•œ
+ * mobå›å¾©
  *------------------------------------------*/
 void mob_heal(struct mob_data *md,unsigned int heal)
 {
@@ -2696,7 +2713,7 @@ int mob_warpslave(struct block_list *bl, int range)
 }
 
 /*==========================================
- * ‰æ–Ê“à‚Ìæ‚èŠª‚«‚Ì”ŒvZ—p(foreachinarea)
+ * ç”»é¢å†…ã®å–ã‚Šå·»ãã®æ•°è¨ˆç®—ç”¨(foreachinarea)
  *------------------------------------------*/
 int mob_countslave_sub(struct block_list *bl,va_list ap)
 {
@@ -2711,7 +2728,7 @@ int mob_countslave_sub(struct block_list *bl,va_list ap)
 }
 
 /*==========================================
- * ‰æ–Ê“à‚Ìæ‚èŠª‚«‚Ì”ŒvZ
+ * ç”»é¢å†…ã®å–ã‚Šå·»ãã®æ•°è¨ˆç®—
  *------------------------------------------*/
 int mob_countslave(struct block_list *bl)
 {
@@ -2813,7 +2830,7 @@ int mob_summonslave(struct mob_data *md2,int *value,int amount,int skill_id)
 }
 
 /*==========================================
- *MOBskill‚©‚çŠY“–skillid‚Ìskillidx‚ğ•Ô‚·
+ *MOBskillã‹ã‚‰è©²å½“skillidã®skillidxã‚’è¿”ã™
  *------------------------------------------*/
 int mob_skillid2skillidx(int class_,int skillid)
 {
@@ -3382,7 +3399,7 @@ int mob_clone_delete(struct mob_data *md)
 }
 
 //
-// ‰Šú‰»
+// åˆæœŸåŒ–
 //
 /*==========================================
  * Since un-setting [ mob ] up was used, it is an initial provisional value setup.
@@ -3775,7 +3792,7 @@ static bool mob_readdb_mobavail(char* str[], int columns, int current)
 
 	class_=atoi(str[0]);
 
-	if(mob_db(class_) == mob_dummy)	// ’l‚ªˆÙí‚È‚çˆ—‚µ‚È‚¢B
+	if(mob_db(class_) == mob_dummy)	// å€¤ãŒç•°å¸¸ãªã‚‰å‡¦ç†ã—ãªã„ã€‚
 	{
 		ShowWarning("mob_readdb_mobavail: Unknown mob id %d.\n", class_);
 		return false;
